@@ -35,3 +35,17 @@ const (
 	STRING   = "STRING"
 	BOOLEAN  = "BOOLEAN"
 )
+
+var keywords = map[string]TokenType{
+	"fn":     FUNCTION,
+	"int":    INTEGER,
+	"string": STRING,
+	"bool":   BOOLEAN,
+}
+
+func LookupIdent(ident string) TokenType {
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+	return IDENT
+}
