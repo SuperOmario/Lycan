@@ -16,9 +16,19 @@ const (
 	IDENT = "IDENT" // add. foobar, x, y, ...
 	INT   = "INT"   // 1343456
 
-	// Operators
-	ASSIGN = "="
-	PLUS   = "+"
+	// Artihmetic Operators
+	ASSIGN   = "="
+	ADD      = "+"
+	SUBTRACT = "-"
+	MULTIPLY = "*"
+	DIVIDE   = "/"
+
+	//Relation Operators
+	EQUAL   = "=="
+	N_EQUAL = "!="
+	NEGATE  = "!"
+	LT      = "<"
+	GT      = ">"
 
 	// Delimiters
 	COMMA     = ","
@@ -34,6 +44,11 @@ const (
 	INTEGER  = "INTEGER"
 	STRING   = "STRING"
 	BOOLEAN  = "BOOLEAN"
+	IF       = "IF"
+	ELSE     = "ELSE"
+	TRUE     = "TRUE"
+	FALSE    = "FALSE"
+	RETURN   = "RETURN"
 )
 
 var keywords = map[string]TokenType{
@@ -41,8 +56,16 @@ var keywords = map[string]TokenType{
 	"int":    INTEGER,
 	"string": STRING,
 	"bool":   BOOLEAN,
+	"if":     IF,
+	"else":   ELSE,
+	"true":   TRUE,
+	"false":  FALSE,
+	"return": RETURN,
 }
 
+//Searches the keywords map for the identifier
+//If it exists the token literal is returned as tok and token is returned as ok
+//If it doesn't exist the identifier is returned as an IDENT token
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok

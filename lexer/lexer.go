@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"Lycan/token"
-	"fmt"
 )
 
 type Lexer struct {
@@ -10,7 +9,7 @@ type Lexer struct {
 	position     int  //current position in input (points to current char)
 	readPosition int  //current reading position in input (after current char)
 	line         int  //current reading line
-	ch           byte //current char under examination
+	ch           rune //current char under examination
 }
 
 func New(input string) *Lexer {
@@ -23,16 +22,10 @@ func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
 	} else {
-		l.ch = l.input[l.readPosition]
+		l.ch = rune(l.input[l.readPosition])
 	}
 	l.position = l.readPosition
 	l.readPosition++
-}
-
-func (l *Lexer) readLine() {
-	for i, line := range l.input {
-		fmt.Println(i, " ", line)
-	}
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -42,7 +35,14 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.EQUAL, Literal: literal}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '(':
@@ -52,11 +52,30 @@ func (l *Lexer) NextToken() token.Token {
 	case ',':
 		tok = newToken(token.COMMA, l.ch)
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		tok = newToken(token.ADD, l.ch)
 	case '{':
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.N_EQUAL, Literal: literal}
+		} else {
+			tok = newToken(token.NEGATE, l.ch)
+		}
+	case '-':
+		tok = newToken(token.SUBTRACT, l.ch)
+	case '*':
+		tok = newToken(token.MULTIPLY, l.ch)
+	case '/':
+		tok = newToken(token.DIVIDE, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -78,6 +97,14 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
+func (l *Lexer) peekChar() rune {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return rune(l.input[l.readPosition])
+	}
+}
+
 func (l *Lexer) readNumber() string {
 	position := l.position
 	for isDigit(l.ch) {
@@ -86,7 +113,7 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
-func isDigit(ch byte) bool {
+func isDigit(ch rune) bool {
 	return '0' <= ch && ch <= '9'
 }
 
@@ -104,10 +131,10 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
-func isLetter(ch byte) bool {
+func isLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
-func newToken(tokenType token.TokenType, ch byte) token.Token {
+func newToken(tokenType token.TokenType, ch rune) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
